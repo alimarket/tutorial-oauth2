@@ -1,2 +1,7 @@
+# Gradle
 .gradle
 build/
+gradle-app.setting
+
+# IntelliJ
+*.iml

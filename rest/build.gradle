@@ -1,0 +1,8 @@
+apply plugin: 'war'
+
+dependencies {
+    compile project(':domain')
+    compile "org.springframework:spring-webmvc:$springVersion"
+
+    providedCompile "javax.servlet:javax.servlet-api:$servletApiVersion"
+}
