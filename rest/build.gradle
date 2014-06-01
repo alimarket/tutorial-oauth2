@@ -1,26 +1,72 @@
-buildscript {
-    repositories {
-        jcenter()
-    }
-
-    dependencies {
-        classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:1.2.3'
-    }
-}
+import org.gradle.api.plugins.jetty.internal.Monitor
 
 apply plugin: 'war'
-apply plugin: 'tomcat'
+apply plugin: 'jetty'
+
+sourceSets {
+    systemTest
+}
+
+configurations {
+    systemTestCompile.extendsFrom testCompile
+    systemTestRuntime.extendsFrom testRuntime
+}
 
 dependencies {
     compile project(':domain')
     compile "org.springframework:spring-webmvc:$springVersion"
+    compile "com.fasterxml.jackson.core:jackson-databind:2.3.3"
 
     providedCompile "javax.servlet:javax.servlet-api:$servletApiVersion"
 
+    systemTestCompile basicCompileDependenciesForTests
+//    systemTestCompile 'com.jayway.restassured:rest-assured:2.3.1'
+    testCompile 'com.jayway.restassured:rest-assured:2.3.1'
+}
 
-    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}"
-    tomcat "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
-    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
-        exclude group: 'org.eclipse.jdt.core.compiler', module: 'ecj'
+task systemTest(type: Test) {
+    description 'Runs system tests by launching requests to a Jetty Server.'
+
+    testClassesDir = sourceSets.systemTest.output.classesDir
+    classpath = sourceSets.systemTest.runtimeClasspath
+
+    doFirst {
+        jettyRun.daemon = true
+        jettyRun.scanIntervalSeconds = 0
+        jettyRun.execute()
+    }
+    doLast {
+        jettyStop.execute()
+    }
+}
+systemTest.shouldRunAfter test
+check.dependsOn systemTest
+
+/*
+ * Jetty configuration
+ */
+[jettyRun, jettyRunWar, jettyStop]*.stopPort = 8079
+[jettyRun, jettyRunWar, jettyStop]*.stopKey = 'stopNow'
+
+jettyRun {
+    contextPath = ''
+    scanIntervalSeconds = 2
+
+    doLast {
+        /*
+         * http://issues.gradle.org/browse/GRADLE-2263
+         * https://github.com/gradle/gradle/blob/master/subprojects/jetty/src/main/java/org/gradle/api/plugins/jetty/AbstractJettyRunTask.java#L240
+         *
+         * THIS IS A WORKAROUND! THE CURRENT VERSION OF THIS TASK DOESN'T START A WATCHER IN DAEMON MODE
+         *
+         * If starting the monitor fails, it may be because the jetty task was updated to fix this issue
+         * When that happens, we shouldn't need the custom task any more
+         *
+         * Copied From: AbstractJettyRunTask
+         */
+        if (getStopPort() != null && getStopPort() > 0 && getStopKey() != null) {
+            Monitor monitor = new Monitor(getStopPort(), getStopKey(), server.getProxiedObject());
+            monitor.start();
+        }
     }
 }
