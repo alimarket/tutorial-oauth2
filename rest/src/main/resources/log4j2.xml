@@ -13,7 +13,7 @@
         </Root>
 
         <Logger name="com.autentia" level="debug"/>
-        <Logger name="org.springframework" level="debug"/>
+        <Logger name="org.springframework" level="trace"/>
     </Loggers>
 
 </Configuration>

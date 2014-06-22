@@ -18,10 +18,6 @@ public class ContentController {
 
     private static final Logger logger = LoggerFactory.getLogger(ContentController.class);
 
-    public ContentController() {
-        logger.debug("Constructor");
-    }
-
     @RequestMapping(method = GET)
     public List<Content> getList() {
         return new ArrayList<>();
@@ -29,29 +25,31 @@ public class ContentController {
 
     @RequestMapping(value = "/{id}", method = GET)
     public Content getDetail(@PathVariable Integer id) {
-        logger.debug("Content id = {}", id);
-
+        logger.debug("Get content id = {}", id);
         return new Content();
     }
 
     @RequestMapping(method = POST, consumes = "application/json")
     public Content create() {
+        logger.debug("Create new content");
         return new Content();
     }
 
     @RequestMapping(value = "/{id}", method = PUT, consumes = "application/json")
-    public Content update() {
+    public Content update(@PathVariable Integer id) {
+        logger.debug("Update content id = {}", id);
         return new Content();
     }
 
     @RequestMapping(value = "/{id}", method = PATCH, consumes = "application/json")
-    public Content partialUpdate() {
+    public Content partialUpdate(@PathVariable Integer id) {
+        logger.debug("Patch content id = {}", id);
         return new Content();
     }
 
     @RequestMapping(value = "/{id}", method = DELETE)
-    public Content delete() {
-        return new Content();
+    public void delete(@PathVariable Integer id) {
+        logger.debug("Delete content id = {}", id);
     }
 
 }

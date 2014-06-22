@@ -1,0 +1,13 @@
+/*$unit: 1.5rem*/
+
+html {
+    font-size: 100%;
+    line-height: 1.5rem;
+    font-family : sans-serif;
+}
+
+.page {
+    width: calc(1.5rem * 23);
+    margin: 0 auto;
+    padding-top: calc(1.5rem * 2);
+}

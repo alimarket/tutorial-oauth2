@@ -14,6 +14,9 @@ subprojects {
         seleniumhqVersion = '2.41.0'
         servletApiVersion = '3.0.1'
         springVersion = '4.0.5.RELEASE'
+        springSecurityVersion = '3.2.3.RELEASE'
+        jacksonDatabindVersion = '2.3.3'
+        springSecurityOAuth2Version = '2.0.1.RELEASE'
         tomcatVersion = '7.0.53'
 
         basicCompileDependenciesForTests = [

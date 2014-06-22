@@ -1,19 +1,16 @@
 package com.autentia.app.domain.web;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.autentia.app.domain.AppConfig;
 
+/**
+ * To use Servlet 3.0 specification.
+ * Disabled for now!
+ */
 public class WebAppInitializer /*extends AbstractAnnotationConfigDispatcherServletInitializer*/ {
-
-    private static final Logger logger = LoggerFactory.getLogger(WebAppInitializer.class);
-
-    public WebAppInitializer() {
-        logger.debug("Constructor");
-    }
 
 //    @Override
     protected Class<?>[] getRootConfigClasses() {
-        return null;
+        return new Class[] { AppConfig.class };
     }
 
 //    @Override

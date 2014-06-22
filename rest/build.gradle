@@ -15,13 +15,17 @@ configurations {
 dependencies {
     compile project(':domain')
     compile "org.springframework:spring-webmvc:$springVersion"
-    compile "com.fasterxml.jackson.core:jackson-databind:2.3.3"
+    compile "com.fasterxml.jackson.core:jackson-databind:$jacksonDatabindVersion"
+    compile "org.springframework.security.oauth:spring-security-oauth2:$springSecurityOAuth2Version"
 
     providedCompile "javax.servlet:javax.servlet-api:$servletApiVersion"
 
-    systemTestCompile basicCompileDependenciesForTests
-//    systemTestCompile 'com.jayway.restassured:rest-assured:2.3.1'
-    testCompile 'com.jayway.restassured:rest-assured:2.3.1'
+    runtime "org.springframework.security:spring-security-taglibs:$springSecurityVersion"
+    runtime "javax.servlet:jstl:1.2"
+
+            systemTestCompile basicCompileDependenciesForTests
+//    systemTestCompile 'com.jayway.restassured:rest-assured:2.3.2' // Sería lo ideal, pero el IntelliJ se lia :_(
+    testCompile 'com.jayway.restassured:rest-assured:2.3.2'
 }
 
 task systemTest(type: Test) {
