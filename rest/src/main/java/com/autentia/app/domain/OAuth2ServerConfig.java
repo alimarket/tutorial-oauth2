@@ -56,7 +56,14 @@ public class OAuth2ServerConfig {
 			 			.authorizedGrantTypes("authorization_code")
 			 			.authorities("ROLE_CLIENT")
 			 			.scopes("read", "write")
-			 			.secret("client-secret")
+			 			.secret("client-secret") // Needed to access /oauth/token with basic authentication.
+                        .and()
+                    .withClient("client-implicit")
+			 			.resourceIds(RESOURCE_1_ID)
+			 			.authorizedGrantTypes("implicit")
+			 			.authorities("ROLE_CLIENT")
+			 			.scopes("read", "write")
+                        .redirectUris("http://registered-to-anywhere") // Checked by authorization server.
             ;
 //			clients.inMemory()
 //                    .withClient("client")

@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class ContentRestTest {
 
     public static final Header ACCEPT_JSON = new Header("Accept", "application/json");
-    private static final RandomValueStringGenerator STATE_GENERATOR = new RandomValueStringGenerator();
+    private static final RandomValueStringGenerator CLIENT_STATE_GENERATOR = new RandomValueStringGenerator();
 
     private final SessionFilter userSession = new SessionFilter();
     private final SessionFilter clientSession = new SessionFilter();
@@ -84,7 +84,7 @@ public class ContentRestTest {
     }
 
     private String userRequestsAuthorizationCode() {
-        final String clientState = STATE_GENERATOR.generate();
+        final String clientState = CLIENT_STATE_GENERATOR.generate();
         getAuthorizationForClient(clientState);
         return giveScopesApprovalForClient(clientState);
     }
@@ -166,11 +166,14 @@ public class ContentRestTest {
     }
 
     @Test
-    public void given_valid_authorization_code__When_client_requests_token__Then_client_can_access_resources_with_received_token() throws Exception {
+    public void given_authorization_code_grant__When_client_access_resource__Then_get_it() throws Exception {
         authenticateUser();
         final String code = userRequestsAuthorizationCode();
         final String token = clientRequestsAccessToken(code);
+        clientGetResource(token);
+    }
 
+    private void clientGetResource(String token) {
         // @formatter:off
         given()
                 .header(ACCEPT_JSON)
@@ -186,7 +189,6 @@ public class ContentRestTest {
                 .body("content", not(isEmptyOrNullString()))
         ;
         // @formatter:on
-
     }
 
     private String clientRequestsAccessToken(String authorizationCode) {
@@ -216,5 +218,73 @@ public class ContentRestTest {
 
         assertThat(token, not(isEmptyOrNullString()));
         return token;
+    }
+
+    @Test
+    public void given_implicit_grant__When_client_access_resource__Then_get_it() throws Exception {
+        final String clientState = CLIENT_STATE_GENERATOR.generate();
+
+        authenticateUser(); // TODO usar la sesión del cliente para hacer bien la simulación.
+
+        // @formatter:off
+        given()
+                .header(ACCEPT_JSON)
+                .filter(userSession)
+                .param("response_type", "token")
+                .param("client_id", "client-implicit")
+                .param("redirect_uri", "http://registered-to-anywhere")
+                .param("scope", "read")
+                .param("state", clientState)
+        .when()
+                .post("/oauth/authorize")
+        .then()
+                .statusCode(HTTP_OK)
+                .contentType(containsString(JSON.toString()))
+                .body("state", is(clientState))
+                .body("redirect_uri", is("http://registered-to-anywhere"))
+        ;
+        // @formatter:on
+
+        //private String giveScopesApprovalForClient(String clientState) {
+        // @formatter:off
+        final String locationHeader =
+        given()
+                .filter(userSession)
+                .param("user_oauth_approval", "true")
+                .param("scope.read", "true")
+        .when()
+                .post("/oauth/authorize")
+        .then()
+                .statusCode(HTTP_MOVED_TEMP)
+        .extract()
+                .header("Location")
+        ;
+        // @formatter:on
+
+        assertThat(locationHeader, not(isEmptyOrNullString()));
+
+        final String[] url = locationHeader.split("#");
+        final String redirectUri = url[0];
+        assertThat(redirectUri, is("http://registered-to-anywhere"));
+        final String[] parameters = url[1].split("&");
+        final String access_token = parameters[0];
+        final String token_type = parameters[1];
+        final String state = parameters[2];
+        final String expires_in = parameters[3];
+        assertThat(access_token, startsWith("access_token="));
+        assertThat(token_type, is("token_type=bearer"));
+        assertThat(state, is("state=" + clientState));
+        assertThat(expires_in, startsWith("expires_in="));
+
+        clientGetResource(access_token.split("=")[1]);
+    }
+
+    @Test
+    public void given_resource_owner_password_credentials_grant__When_client_access_resource__Then_get_it() throws Exception {
+
+    }
+
+    @Test
+    public void given_client_credentials_grant__When_client_access_resource__Then_get_it() throws Exception {
     }
 }
