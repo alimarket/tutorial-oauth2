@@ -1,7 +1,5 @@
 package com.autentia.app.domain.web.oauth2;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.common.util.OAuth2Utils;
 import org.springframework.security.oauth2.provider.AuthorizationRequest;
 import org.springframework.security.oauth2.provider.ClientDetails;
@@ -25,8 +23,6 @@ public class AccessConfirmationController {
     private ClientDetailsService clientDetailsService;
 
     private ApprovalStore approvalStore;
-
-    private static final Logger logger = LoggerFactory.getLogger(AccessConfirmationController.class);
 
     @RequestMapping("/oauth/confirm_access")
     public ModelAndView getAccessConfirmation(Map<String, Object> model, Principal principal) throws Exception {
@@ -63,12 +59,10 @@ public class AccessConfirmationController {
     }
 
     public void setClientDetailsService(ClientDetailsService clientDetailsService) {
-        logger.debug("+++++++++++ {} ", clientDetailsService);
         this.clientDetailsService = clientDetailsService;
     }
 
     public void setApprovalStore(ApprovalStore approvalStore) {
-        logger.debug("+++++++++++ {} ", approvalStore);
         this.approvalStore = approvalStore;
     }
 }

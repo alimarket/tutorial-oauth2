@@ -166,17 +166,38 @@ public class ContentRestTest {
     }
 
     @Test
-    public void given_valid_authorization_code__When_client_requests_access_token__Then_authorization_server_returns_token() throws Exception {
+    public void given_valid_authorization_code__When_client_requests_token__Then_client_can_access_resources_with_received_token() throws Exception {
         authenticateUser();
         final String code = userRequestsAuthorizationCode();
+        final String token = clientRequestsAccessToken(code);
 
         // @formatter:off
+        given()
+                .header(ACCEPT_JSON)
+                .filter(clientSession)
+                .header("Authorization", "bearer " + token)
+        .when()
+                .get("/content/1")
+        .then()
+                .statusCode(HTTP_OK)
+                .contentType(containsString(JSON.toString()))
+                .body("id", not(isEmptyOrNullString()))
+                .body("title", not(isEmptyOrNullString()))
+                .body("content", not(isEmptyOrNullString()))
+        ;
+        // @formatter:on
+
+    }
+
+    private String clientRequestsAccessToken(String authorizationCode) {
+        // @formatter:off
+        final String token =
         given()
                 .header(ACCEPT_JSON)
                 .auth().preemptive().basic("client", "client-secret")
                 .filter(clientSession)
                 .param("grant_type", "authorization_code")
-                .param("code", code)
+                .param("code", authorizationCode)
                 .param("redirect_uri", "http://anywhere")
                 .param("client_id", "client")
         .when()
@@ -184,9 +205,16 @@ public class ContentRestTest {
         .then()
                 .statusCode(HTTP_OK)
                 .contentType(containsString(JSON.toString()))
-                .body("token_type", is("bearer"))
                 .body("access_token", not(isEmptyOrNullString()))
+                .body("token_type", is("bearer"))
+                .body("expires_in", not(isEmptyOrNullString()))
+                .body("scope", not(isEmptyOrNullString()))
+        .extract()
+                .path("access_token")
         ;
         // @formatter:on
+
+        assertThat(token, not(isEmptyOrNullString()));
+        return token;
     }
 }

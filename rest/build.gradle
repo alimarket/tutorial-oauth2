@@ -23,9 +23,9 @@ dependencies {
     runtime "org.springframework.security:spring-security-taglibs:$springSecurityVersion"
     runtime "javax.servlet:jstl:1.2"
 
-            systemTestCompile basicCompileDependenciesForTests
+    systemTestCompile basicCompileDependenciesForTests
 //    systemTestCompile 'com.jayway.restassured:rest-assured:2.3.2' // Sería lo ideal, pero el IntelliJ se lia :_(
-    testCompile 'com.jayway.restassured:rest-assured:2.3.2'
+    testCompile "com.jayway.restassured:rest-assured:$restAssuredVersion"
 }
 
 task systemTest(type: Test) {
