@@ -33,7 +33,7 @@ public class ClientAgent extends Agent {
         accessToken =
         given()
                 .header(ACCEPT_JSON)
-                .auth().preemptive().basic("client", "client-secret")
+                .auth().preemptive().basic(id, secret)
                 .filter(sessionFilter)
                 .param("grant_type", "authorization_code")
                 .param("code", authorizationCode)
@@ -50,26 +50,6 @@ public class ClientAgent extends Agent {
                 .body("scope", not(isEmptyOrNullString()))
         .extract()
                 .path("access_token")
-        ;
-        // @formatter:on
-    }
-
-    public void getResource() {
-        if (accessToken == null) throw new IllegalStateException("You don't have access token yet. Try to request an access token first.");
-
-        // @formatter:off
-        given()
-                .header(ACCEPT_JSON)
-                .filter(sessionFilter)
-                .header("Authorization", "bearer " +  accessToken)
-        .when()
-                .get("/content/1")
-        .then()
-                .statusCode(HTTP_OK)
-                .contentType(containsString(JSON.toString()))
-                .body("id", not(isEmptyOrNullString()))
-                .body("title", not(isEmptyOrNullString()))
-                .body("content", not(isEmptyOrNullString()))
         ;
         // @formatter:on
     }
@@ -125,14 +105,14 @@ public class ClientAgent extends Agent {
         refreshToken = response.extract().path("refresh_token");
     }
 
-    public void requestsTokenWithClientCredential() {
+    public void requestsTokenWithClientCredential(String scope) {
         // @formatter:off
         accessToken = given()
                 .header(ACCEPT_JSON)
                 .auth().preemptive().basic(id, secret)
                 .filter(sessionFilter)
                 .param("grant_type", "client_credentials")
-                .param("scope", "read")
+                .param("scope", scope)
         .when()
                 .post("/oauth/token")
         .then()
@@ -174,11 +154,56 @@ public class ClientAgent extends Agent {
         // @formatter:on
     }
 
+    public void getResource() {
+        if (accessToken == null) throw new IllegalStateException("You don't have access token yet. Try to request an access token first.");
+
+        // @formatter:off
+        given()
+                .header(ACCEPT_JSON)
+                .filter(sessionFilter)
+                .header("Authorization", "bearer " +  accessToken)
+        .when()
+                .get("/content/1")
+        .then()
+                .statusCode(HTTP_OK)
+                .contentType(containsString(JSON.toString()))
+                .body("id", not(isEmptyOrNullString()))
+                .body("title", not(isEmptyOrNullString()))
+                .body("content", not(isEmptyOrNullString()))
+        ;
+        // @formatter:on
+    }
+
+    public void deleteResource() {
+        if (accessToken == null) throw new IllegalStateException("You don't have access token yet. Try to request an access token first.");
+
+        // @formatter:off
+        given()
+                .header(ACCEPT_JSON)
+                .filter(sessionFilter)
+                .header("Authorization", "bearer " +  accessToken)
+        .when()
+                .delete("/content/1")
+        .then()
+                .log().all()
+//                .statusCode(HTTP_OK)
+//                .contentType(containsString(JSON.toString()))
+//                .body("id", not(isEmptyOrNullString()))
+//                .body("title", not(isEmptyOrNullString()))
+//                .body("content", not(isEmptyOrNullString()))
+        ;
+        // @formatter:on
+    }
+
     public String getRefreshToken() {
         return refreshToken;
     }
 
     public String getClientState() {
         return clientState;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
     }
 }

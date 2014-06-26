@@ -2,6 +2,7 @@ package com.autentia.app.domain;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
@@ -34,7 +35,11 @@ public class OAuth2ServerConfig {
 				.requestMatchers().antMatchers("/content/**")
 			    .and()
 			.authorizeRequests()
-                .antMatchers("/content/**").access("#oauth2.hasScope('read') or hasRole('ROLE_USER')")
+                .antMatchers(HttpMethod.POST, "/content/**").access("#oauth2.hasScope('write')")
+                .antMatchers(HttpMethod.PUT, "/content/**").access("#oauth2.hasScope('write')")
+                .antMatchers(HttpMethod.PATCH, "/content/**").access("#oauth2.hasScope('write')")
+                .antMatchers(HttpMethod.DELETE, "/content/**").access("#oauth2.hasScope('write')")
+                .antMatchers(HttpMethod.GET, "/content/**").access("#oauth2.hasScope('read') or hasRole('ROLE_USER')")
             ;
 			// @formatter:on
         }

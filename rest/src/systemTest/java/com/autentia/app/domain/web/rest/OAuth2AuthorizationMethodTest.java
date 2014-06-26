@@ -14,7 +14,7 @@ import static java.net.HttpURLConnection.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
-public class OAuth2AuthorizationMethodsTest {
+public class OAuth2AuthorizationMethodTest {
 
     @BeforeClass
     public static void setUpOnce() throws Exception {
@@ -23,7 +23,7 @@ public class OAuth2AuthorizationMethodsTest {
     }
 
     @Test
-    public void give_unauthenticated_client__When_resource_is_accessed__Then_response_with_unauthorized_error() throws Exception {
+    public void given_unauthenticated_client__When_resource_is_accessed__Then_response_with_unauthorized_error() throws Exception {
         // @formatter:off
         given()
                 .header(ACCEPT_JSON)
@@ -55,7 +55,7 @@ public class OAuth2AuthorizationMethodsTest {
     }
 
     @Test
-    public void give_authenticated_user__When_resource_is_accessed__Then_response_with_the_resource() throws Exception {
+    public void given_authenticated_user__When_resource_is_accessed__Then_response_with_the_resource() throws Exception {
         final UserAgent user = new UserAgent();
 
         user.authenticate();
@@ -113,7 +113,7 @@ public class OAuth2AuthorizationMethodsTest {
     public void given_client_credentials_grant__When_client_access_resource__Then_get_it() throws Exception {
         final ClientAgent client = new ClientAgent("client-credentials", "client-credentials-secret");
 
-        client.requestsTokenWithClientCredential();
+        client.requestsTokenWithClientCredential("read");
         client.getResource();
     }
 
@@ -122,10 +122,15 @@ public class OAuth2AuthorizationMethodsTest {
         final ClientAgent client = new ClientAgent("client-with-refresh-token", "client-with-refresh-token-secret");
 
         client.requestsTokenWithUserCredentials("user1", "user1");
+        final String firstToken = client.getAccessToken();
+
         final String refreshToken = client.getRefreshToken();
         assertThat(refreshToken, not(isEmptyOrNullString()));
 
         client.requestsTokenWithRefreshToken();
+        final String secondToken = client.getAccessToken();
+        assertThat(secondToken, not(is(firstToken)));
+
         client.getResource();
     }
 }
